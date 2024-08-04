@@ -4,7 +4,7 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "Get busy living or get busy dying.", category: "Motivation" },
 ];
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; 
 
 function saveQuotes() {
     localStorage.setItem('quotes', JSON.stringify(quotes));
@@ -35,8 +35,8 @@ function addQuote() {
         updateCategoryFilter();
         alert('Quote added successfully!');
 
-        // 
-        syncWithServer();
+        // Sync with server
+        postQuoteToServer(newQuote);
     } else {
         alert('Please enter both a quote and a category.');
     }
@@ -106,29 +106,61 @@ function importFromJsonFile(event) {
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
-
-function syncWithServer() {
-   
+// Fetch quotes from server
+function fetchQuotesFromServer() {
     fetch(API_URL)
         .then(response => response.json())
         .then(serverQuotes => {
-      
             const serverQuotesArray = serverQuotes.map(post => ({
                 text: post.body,
                 category: post.title
             }));
 
-        
-            quotes = serverQuotesArray;
-            saveQuotes();
-            populateCategories();
-            filterQuotes();
+            resolveConflicts(serverQuotesArray);
         })
         .catch(error => console.error('Error fetching quotes from server:', error));
 }
 
+ 
+function postQuoteToServer(quote) {
+    fetch(API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(quote)
+    })
+    .then(response => response.json())
+    .then(data => console.log('Quote posted successfully:', data))
+    .catch(error => console.error('Error posting quote to server:', error));
+}
 
-setInterval(syncWithServer, 300000);
+ 
+function resolveConflicts(serverQuotesArray) {
+   
+    quotes = serverQuotesArray;
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+ 
+    notifyUser('Quotes synchronized with server');
+}
+ 
+function notifyUser(message) {
+    const notification = document.getElementById('notification');
+    notification.innerText = message;
+    setTimeout(() => notification.innerText = '', 5000);
+}
+
+//  
+function syncQuotes() {
+    fetchQuotesFromServer();
+}
+
+ 
+syncQuotes();
+setInterval(syncQuotes, 300000);  
 
 createAddQuoteForm();
 populateCategories();
