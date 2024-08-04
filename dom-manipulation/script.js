@@ -4,7 +4,7 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "Get busy living or get busy dying.", category: "Motivation" },
 ];
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts'; 
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';  
 
 function saveQuotes() {
     localStorage.setItem('quotes', JSON.stringify(quotes));
@@ -35,7 +35,7 @@ function addQuote() {
         updateCategoryFilter();
         alert('Quote added successfully!');
 
-        // Sync with server
+       
         postQuoteToServer(newQuote);
     } else {
         alert('Please enter both a quote and a category.');
@@ -106,46 +106,54 @@ function importFromJsonFile(event) {
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
-// Fetch quotes from server
-function fetchQuotesFromServer() {
-    fetch(API_URL)
-        .then(response => response.json())
-        .then(serverQuotes => {
-            const serverQuotesArray = serverQuotes.map(post => ({
-                text: post.body,
-                category: post.title
-            }));
+ 
+async function fetchQuotesFromServer() {
+    try {
+        const response = await fetch(API_URL);
+        const serverQuotes = await response.json();
+        const serverQuotesArray = serverQuotes.map(post => ({
+            text: post.body,
+            category: post.title
+        }));
 
-            resolveConflicts(serverQuotesArray);
-        })
-        .catch(error => console.error('Error fetching quotes from server:', error));
+        resolveConflicts(serverQuotesArray);
+    } catch (error) {
+        console.error('Error fetching quotes from server:', error);
+        notifyUser('Error fetching quotes from server.');
+    }
 }
 
- 
-function postQuoteToServer(quote) {
-    fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(quote)
-    })
-    .then(response => response.json())
-    .then(data => console.log('Quote posted successfully:', data))
-    .catch(error => console.error('Error posting quote to server:', error));
+// Post new quote to server
+async function postQuoteToServer(quote) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(quote)
+        });
+        const data = await response.json();
+        console.log('Quote posted successfully:', data);
+    } catch (error) {
+        console.error('Error posting quote to server:', error);
+    }
 }
 
  
 function resolveConflicts(serverQuotesArray) {
-   
-    quotes = serverQuotesArray;
+    
+    const serverQuoteTexts = new Set(serverQuotesArray.map(q => q.text));
+    quotes = quotes.filter(q => !serverQuoteTexts.has(q.text)).concat(serverQuotesArray);
+    
     saveQuotes();
     populateCategories();
     filterQuotes();
 
- 
+    
     notifyUser('Quotes synchronized with server');
 }
+
  
 function notifyUser(message) {
     const notification = document.getElementById('notification');
@@ -153,14 +161,13 @@ function notifyUser(message) {
     setTimeout(() => notification.innerText = '', 5000);
 }
 
-//  
+ 
 function syncQuotes() {
     fetchQuotesFromServer();
 }
-
  
 syncQuotes();
-setInterval(syncQuotes, 300000);  
+setInterval(syncQuotes, 300000); 
 
 createAddQuoteForm();
 populateCategories();
