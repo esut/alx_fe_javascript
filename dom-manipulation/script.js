@@ -82,7 +82,24 @@ function getFilteredQuotes() {
 }
 
 
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    localStorage.setItem('selectedCategory', selectedCategory);
+    showRandomQuote();
+}
 
+function exportQuotes() {
+    const dataStr = JSON.stringify(quotes);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quotes.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 
 
 function importFromJsonFile(event) {
