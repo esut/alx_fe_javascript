@@ -4,45 +4,57 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "Get busy living or get busy dying.", category: "Motivation" },
 ];
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';  
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
 function saveQuotes() {
+
     localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
 function showRandomQuote() {
+
     const quoteDisplay = document.getElementById('quoteDisplay');
     const filteredQuotes = getFilteredQuotes();
+
     const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+
     const randomQuote = filteredQuotes[randomIndex];
+
     quoteDisplay.innerHTML = `<p>${randomQuote.text}</p><p><em>${randomQuote.category}</em></p>`;
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
-function createAddQuoteForm() {
+function createAddQuoteForm()
+ {
     document.getElementById('addQuoteButton').addEventListener('click', addQuote);
 }
 
-function addQuote() {
+function addQuote()
+ {
     const newQuoteText = document.getElementById('newQuoteText').value;
     const newQuoteCategory = document.getElementById('newQuoteCategory').value;
 
-    if (newQuoteText && newQuoteCategory) {
-        const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    if (newQuoteText && newQuoteCategory) 
+        {
+        const newQuote = 
+        { text: newQuoteText, category: newQuoteCategory };
         quotes.push(newQuote);
         saveQuotes();
         updateCategoryFilter();
-        alert('Quote added successfully!');
 
-       
+        alert(' added successfully!');
+
+  
         postQuoteToServer(newQuote);
-    } else {
-        alert('Please enter both a quote and a category.');
+    } else 
+    {
+        alert('Please enter both a quote .');
     }
 }
 
-function populateCategories() {
+function populateCategories() 
+{
     const categoryFilter = document.getElementById('categoryFilter');
     const selectedCategory = categoryFilter.value;
 
@@ -98,7 +110,7 @@ function importFromJsonFile(event) {
         quotes.push(...importedQuotes);
         saveQuotes();
         populateCategories();
-        alert('Quotes imported successfully!');
+        notifyUser('Quotes imported successfully!'); 
     };
     fileReader.readAsText(event.target.files[0]);
 }
@@ -106,7 +118,7 @@ function importFromJsonFile(event) {
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
- 
+
 async function fetchQuotesFromServer() {
     try {
         const response = await fetch(API_URL);
@@ -118,12 +130,12 @@ async function fetchQuotesFromServer() {
 
         resolveConflicts(serverQuotesArray);
     } catch (error) {
-        console.error('Error fetching quotes from server:', error);
-        notifyUser('Error fetching quotes from server.');
+        console.error('error fetching :', error);
+        notifyUser('error fetching  from server.'); 
     }
 }
 
-// Post new quote to server
+
 async function postQuoteToServer(quote) {
     try {
         const response = await fetch(API_URL, {
@@ -134,13 +146,13 @@ async function postQuoteToServer(quote) {
             body: JSON.stringify(quote)
         });
         const data = await response.json();
-        console.log('Quote posted successfully:', data);
+        console.log('posted successfully:', data);
     } catch (error) {
-        console.error('Error posting quote to server:', error);
+        console.error('Error  server:', error);
     }
 }
 
- 
+
 function resolveConflicts(serverQuotesArray) {
     
     const serverQuoteTexts = new Set(serverQuotesArray.map(q => q.text));
@@ -150,24 +162,25 @@ function resolveConflicts(serverQuotesArray) {
     populateCategories();
     filterQuotes();
 
-    
-    notifyUser('Quotes synchronized with server');
+   
+    notifyUser('Quotes synced with server!');  
 }
 
  
 function notifyUser(message) {
     const notification = document.getElementById('notification');
-    notification.innerText = message;
-    setTimeout(() => notification.innerText = '', 5000);
+    notification.innerText = message;  
+    setTimeout(() => notification.innerText = '', 5000);  
 }
 
  
 function syncQuotes() {
     fetchQuotesFromServer();
 }
+
  
 syncQuotes();
-setInterval(syncQuotes, 300000); 
+setInterval(syncQuotes, 300000);  
 
 createAddQuoteForm();
 populateCategories();
