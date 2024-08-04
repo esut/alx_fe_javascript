@@ -38,8 +38,80 @@ function addQuote() {
         document.getElementById('newQuoteCategory').value = '';
 
         updateCategoryFilter();
-        alert('Quote added successfully!');
+        alert('  added successfully!');
     } else {
-        alert('Please enter both a quote and a category.');
+        alert('please enter both  .');
     }
 }
+
+function updateCategoryFilter() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const selectedCategory = categoryFilter.value;
+
+    
+    categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
+   
+    const categories = [...new Set(quotes.map(quote => quote.category))];
+
+    
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categoryFilter.appendChild(option);
+    });
+
+    
+    categoryFilter.value = selectedCategory;
+}
+
+function getFilteredQuotes() {
+
+    const selectedCategory = localStorage.getItem('selectedCategory') || 'all';
+
+    const categoryFilter = document.getElementById('categoryFilter');
+
+    categoryFilter.value = selectedCategory;
+
+    if (selectedCategory === 'all') {
+        return quotes;
+    } else {
+        return quotes.filter(quote => quote.category === selectedCategory);
+    }
+}
+
+
+
+
+
+function importFromJsonFile(event) {
+
+    const fileReader = new FileReader();
+
+    fileReader.onload = function(event) {
+
+        const importedQuotes = JSON.parse(event.target.result);
+        quotes.push(...importedQuotes);
+
+        saveQuotes();
+
+        updateCategoryFilter();
+
+        alert(' imported successfully!');
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
+document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
+
+document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+
+//  
+createAddQuoteForm();
+
+//  
+updateCategoryFilter();
+
+//  
+filterQuotes();
