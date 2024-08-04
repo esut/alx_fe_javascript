@@ -1,10 +1,7 @@
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [
-
-    { text: "the only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
-
-    { text: "life is what happens when you're busy making other plans.", category: "Life" },
-
-    { text: "get busy living or get busy dying.", category: "Motivation" },
+    { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
+    { text: "Life is what happens when you're busy making other plans.", category: "Life" },
+    { text: "Get busy living or get busy dying.", category: "Motivation" },
 ];
 
 function saveQuotes() {
@@ -37,24 +34,21 @@ function addQuote() {
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
 
-        updateCategoryFilter();
-        alert('  added successfully!');
+        populateCategories();
+        alert('Quote added successfully!');
     } else {
-        alert('please enter both  .');
+        alert('Please enter both a quote and a category.');
     }
 }
 
-function updateCategoryFilter() {
+function populateCategories() {
     const categoryFilter = document.getElementById('categoryFilter');
     const selectedCategory = categoryFilter.value;
 
-    
     categoryFilter.innerHTML = '<option value="all">All Categories</option>';
 
-   
     const categories = [...new Set(quotes.map(quote => quote.category))];
 
-    
     categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category;
@@ -62,16 +56,12 @@ function updateCategoryFilter() {
         categoryFilter.appendChild(option);
     });
 
-    
     categoryFilter.value = selectedCategory;
 }
 
 function getFilteredQuotes() {
-
     const selectedCategory = localStorage.getItem('selectedCategory') || 'all';
-
     const categoryFilter = document.getElementById('categoryFilter');
-
     categoryFilter.value = selectedCategory;
 
     if (selectedCategory === 'all') {
@@ -80,7 +70,6 @@ function getFilteredQuotes() {
         return quotes.filter(quote => quote.category === selectedCategory);
     }
 }
-
 
 function filterQuotes() {
     const selectedCategory = document.getElementById('categoryFilter').value;
@@ -101,34 +90,21 @@ function exportQuotes() {
     document.body.removeChild(a);
 }
 
-
 function importFromJsonFile(event) {
-
     const fileReader = new FileReader();
-
     fileReader.onload = function(event) {
-
         const importedQuotes = JSON.parse(event.target.result);
         quotes.push(...importedQuotes);
-
         saveQuotes();
-
-        updateCategoryFilter();
-
-        alert(' imported successfully!');
+        populateCategories();
+        alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
 }
 
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
-
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
-//  
 createAddQuoteForm();
-
-//  
-updateCategoryFilter();
-
-//  
+populateCategories();
 filterQuotes();
