@@ -4,6 +4,8 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "Get busy living or get busy dying.", category: "Motivation" },
 ];
 
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+
 function saveQuotes() {
     localStorage.setItem('quotes', JSON.stringify(quotes));
 }
@@ -30,12 +32,11 @@ function addQuote() {
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
         quotes.push(newQuote);
         saveQuotes();
-
-        document.getElementById('newQuoteText').value = '';
-        document.getElementById('newQuoteCategory').value = '';
-
-        populateCategories();
+        updateCategoryFilter();
         alert('Quote added successfully!');
+
+        // 
+        syncWithServer();
     } else {
         alert('Please enter both a quote and a category.');
     }
@@ -104,6 +105,30 @@ function importFromJsonFile(event) {
 
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+
+
+function syncWithServer() {
+   
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(serverQuotes => {
+      
+            const serverQuotesArray = serverQuotes.map(post => ({
+                text: post.body,
+                category: post.title
+            }));
+
+        
+            quotes = serverQuotesArray;
+            saveQuotes();
+            populateCategories();
+            filterQuotes();
+        })
+        .catch(error => console.error('Error fetching quotes from server:', error));
+}
+
+
+setInterval(syncWithServer, 300000);
 
 createAddQuoteForm();
 populateCategories();
